@@ -16,21 +16,23 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # 1. پہلے فلیٹر سیٹ اپ کریں تاکہ کمانڈ کام کرے
       - name: Setup Flutter Environment
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.0'
           cache: true
 
-      # 2. اب فلیٹر کی موجودگی میں پروجیکٹ اسٹرکچر بنائیں
       - name: Create Flutter Project Structure
         run: |
           flutter create . --org com.karachi.vip --project-name karachi_vip_hub --platforms=android
           mkdir -p lib
           if [ -f main.dart ]; then mv main.dart lib/main.dart; fi
+          
+          # minSdkVersion کو بڑھا کر 21 کرنا تاکہ فائر بیس کے پلگ انز بغیر کسی ایرر کے چل سکیں
+          if [ -f android/app/build.gradle ]; then
+            sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle
+          fi
 
-      # 3. ڈیپینڈেন্সি اور بلڈ کریں
       - run: flutter pub get
       - run: flutter build apk --release
 
@@ -38,3 +40,4 @@ jobs:
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
+          
